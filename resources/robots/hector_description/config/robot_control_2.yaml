@@ -1,0 +1,29 @@
+hector_gazebo:
+    # Publish all joint states -----------------------------------
+    joint_state_controller:
+        type: joint_state_controller/JointStateController
+        publish_rate: 1000  
+
+    # L Controllers ---------------------------------------
+    l_f_mt_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: l_f_mt_joint
+    l_b_mt_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: l_b_mt_joint
+
+
+    r_f_mt_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: r_f_mt_joint
+    r_b_mt_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: r_b_mt_joint
+
+    l_wheel_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: l_wheel_joint
+    r_wheel_controller:
+        type: unitree_legged_control/UnitreeJointController
+        joint: r_wheel_joint
+
