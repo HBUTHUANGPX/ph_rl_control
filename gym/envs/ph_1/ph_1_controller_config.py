@@ -46,7 +46,7 @@ class Ph_1_ControllerCfg(LeggedRobotCfg):
         root_pos_range = [
             [0.0, 0.0],  # x
             [0.0, 0.0],  # y
-            [0.345, 0.366],  # z
+            [0.245, 0.266],  # z
             [-torch.pi / 12, torch.pi / 12],  # roll
             [-torch.pi / 12, torch.pi / 12],  # pitch
             [-1e-5, 1e-5],  # yaw
@@ -225,7 +225,7 @@ class Ph_1_ControllerCfg(LeggedRobotCfg):
             lin_vel_z = 1e-1
             ang_vel_xy = 1e-1
             dof_pos_limits = 10
-            torque_limits = 1e-2
+            torque_limits = 1e-1
             dof_vel_limits = 1e-1
             # * Floating base rewards * #
             base_height = 1.0
@@ -234,7 +234,7 @@ class Ph_1_ControllerCfg(LeggedRobotCfg):
 
             # * shape rewards * #
             two_hip_same_theta = 2.6
-            two_hip_zero_theta = 0.6
+            two_hip_zero_theta = 0.1
             two_leg_same_length = 0.6
             two_leg_zero_length = 2.6
 

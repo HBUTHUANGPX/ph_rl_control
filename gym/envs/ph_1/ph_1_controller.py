@@ -332,15 +332,15 @@ class Ph_1_Controller(LeggedRobot):
         qd_des = self.desired_pos_target * self.dof_ctr_type_mask_vel
         kp = self.p_gains.clone()
         kd = self.d_gains.clone()
-        # 髋关节
+        ############################# 髋关节
         hip_indices = [0, 3]
         # q_des[:, hip_indices[0]] = q_des[:, hip_indices[1]]
 
-        # 平移关节
+        ############################# 平移关节
         p_indices = [1, 4]
         # print(self.desired_pos_target[0, p_indices])
-        derta_z = self.desired_pos_target[:, 1] / 15
-        derta_roll = self.desired_pos_target[:, 4] / 30
+        derta_z = self.desired_pos_target[:, 1] / 50
+        derta_roll = self.desired_pos_target[:, 4] / 50
 
         derta_roll_z = torch.sin(derta_roll)
 
@@ -348,10 +348,10 @@ class Ph_1_Controller(LeggedRobot):
         q_des[:, p_indices[1]] = derta_z + derta_roll_z
         # q_des = torch.clip(q_des, -3, 3)
 
-        # 轮
+        ############################ 轮
         wh_indices = [2, 5]
         # print(self.desired_pos_target[0, wh_indices])
-        w_z = self.desired_pos_target[:, 2]
+        w_z = self.desired_pos_target[:, 2] / 50
         # print(self.cfg.commands.ranges.name)
         # print("w_z: ",w_z)
         # print("self.cfg.commands.ranges.yaw_vel: ",self.cfg.commands.ranges.yaw_vel)
@@ -359,7 +359,7 @@ class Ph_1_Controller(LeggedRobot):
             w_z, -self.cfg.commands.ranges.yaw_vel, self.cfg.commands.ranges.yaw_vel
         )
         # print(w_z)
-        v_x = self.desired_pos_target[:, 5]
+        v_x = self.desired_pos_target[:, 5] / 50
         # print(v_x)
         v_x = torch.clip(
             v_x,
@@ -907,7 +907,7 @@ class Ph_1_Controller(LeggedRobot):
         return _rew
 
     def _reward_wheel_contact_ground(self):
-        _rew = (torch.sum(self.foot_contact, dim=1)-1)*2
+        _rew = (torch.sum(self.foot_contact, dim=1) - 1) * 2
         # print(_rew[0])
         # print(_rew.size())
         return _rew
@@ -1036,6 +1036,15 @@ class Ph_1_Controller(LeggedRobot):
 
     def _reward_wheel_power(self): ...
 
+    def _reward_wheel_vel_diff_from_base(self):
+        l = self.dof_vel[:, 2] * 0.15
+        r = self.dof_vel[:, 2] * 0.15
+        w = 2*(l - r) / 0.52
+        v = (l + r) / 2
+        diff_w = torch.abs(self.base_ang_vel[:, 2] - w) / 4
+        diff_v = torch.abs(self.base_lin_vel[:, 0] - v) / 2
+        _rew = torch.exp(-diff_w * 10.0) + torch.exp(-diff_v * 10.0)
+        return _rew
     # ##################### HELPER FUNCTIONS ################################## #
 
     def smooth_sqr_wave(self, phase):
