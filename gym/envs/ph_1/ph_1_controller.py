@@ -339,8 +339,8 @@ class Ph_1_Controller(LeggedRobot):
         ############################# 平移关节
         p_indices = [1, 4]
         # print(self.desired_pos_target[0, p_indices])
-        derta_z = self.desired_pos_target[:, 1] / 50
-        derta_roll = self.desired_pos_target[:, 4] / 50
+        derta_z = self.desired_pos_target[:, 1] / 30
+        derta_roll = self.desired_pos_target[:, 4] / 30
 
         derta_roll_z = torch.sin(derta_roll)
 
@@ -351,7 +351,7 @@ class Ph_1_Controller(LeggedRobot):
         ############################ 轮
         wh_indices = [2, 5]
         # print(self.desired_pos_target[0, wh_indices])
-        w_z = self.desired_pos_target[:, 2] / 50
+        w_z = self.desired_pos_target[:, 2] / 30
         # print(self.cfg.commands.ranges.name)
         # print("w_z: ",w_z)
         # print("self.cfg.commands.ranges.yaw_vel: ",self.cfg.commands.ranges.yaw_vel)
@@ -359,7 +359,7 @@ class Ph_1_Controller(LeggedRobot):
             w_z, -self.cfg.commands.ranges.yaw_vel, self.cfg.commands.ranges.yaw_vel
         )
         # print(w_z)
-        v_x = self.desired_pos_target[:, 5] / 50
+        v_x = self.desired_pos_target[:, 5] / 30
         # print(v_x)
         v_x = torch.clip(
             v_x,
@@ -544,12 +544,12 @@ class Ph_1_Controller(LeggedRobot):
         self.terminated = torch.any((term_contact > 1.0), dim=1)
 
         # * Termination for velocities, orientation, and low height
-        self.terminated |= torch.any(
-            torch.norm(self.base_lin_vel, dim=-1, keepdim=True) > 5.0, dim=1
-        )
-        self.terminated |= torch.any(
-            torch.norm(self.base_ang_vel, dim=-1, keepdim=True) > 30.0, dim=1
-        )
+        # self.terminated |= torch.any(
+        #     torch.norm(self.base_lin_vel, dim=-1, keepdim=True) > 5.0, dim=1
+        # )
+        # self.terminated |= torch.any(
+        #     torch.norm(self.base_ang_vel, dim=-1, keepdim=True) > 30.0, dim=1
+        # )
         # self.terminated |= torch.any(
         #     torch.abs(self.projected_gravity[:, 0:1]) > 0.7, dim=1
         # )
@@ -557,6 +557,7 @@ class Ph_1_Controller(LeggedRobot):
         #     torch.abs(self.projected_gravity[:, 1:2]) > 0.7, dim=1
         # )
         # self.terminated |= torch.any(self.base_pos[:, 2:3] < 0.2, dim=1)
+        self.terminated |= torch.any(self.base_pos[:, 2:3] > 0.4, dim=1)
 
         # * No terminal reward for time-outs
         self.timed_out = self.episode_length_buf > self.max_episode_length
@@ -857,10 +858,10 @@ class Ph_1_Controller(LeggedRobot):
 
     def _reward_base_axis_xy_orientation(self):
         """Reward tracking upright orientation"""
-        ind = [1, 2]
-        aa = self.projected_gravity[:, ind]
-        error = torch.norm(aa, dim=-1)
-
+        # ind = [1, 2]
+        # aa = self.projected_gravity[:, ind]
+        # error = torch.norm(aa, dim=-1)
+        error = torch.square(self.projected_gravity[:, 0])
         _rew = self._negsqrd_exp(error, a=1.5)
         # print("_reward_base_axis_y_orientation: \n", aa)
         # print("_reward_base_axis_y_orientation: \n", _rew)
