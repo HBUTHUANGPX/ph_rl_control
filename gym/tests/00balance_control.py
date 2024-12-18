@@ -391,7 +391,7 @@ class balance_controller:
         wheel_pitch_kd = 0.1 * torch.ones(
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
-        wheel_pitch_ki = 0.0 * torch.ones(
+        wheel_pitch_ki = 0.001 * torch.ones(
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
         self.wheel_pitch_pid = PIDController(
