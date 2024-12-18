@@ -362,18 +362,14 @@ class balance_controller:
         wheel_pitch_kd = 0.1 * torch.ones(
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
-<<<<<<< HEAD
-        wheel_pitch_ki = 0.001 * torch.ones(
-=======
         wheel_pitch_ki = 0.01 * torch.ones(
->>>>>>> 73e702472e617e2639264292e19d7a9b39c65f60
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
         self.wheel_pitch_pid = PIDController(
             wheel_pitch_kp, wheel_pitch_ki, wheel_pitch_kd, _dt
         )
 
-        wheel_vel_kp = 0.2 * torch.ones(
+        wheel_vel_kp = 2.0 * torch.ones(
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
         wheel_vel_kd = 0.001 * torch.ones(
@@ -388,7 +384,7 @@ class balance_controller:
 
     def PID_controller(self):
         action = np.zeros((4, 6), dtype=np.float32)
-        command = np.array([0.0, 0.0, 0.1], dtype=np.float32)
+        command = np.array([0.1, 0.0, 0.], dtype=np.float32)
         command = torch.from_numpy(np.tile(command, (self.num_envs, 1)))
         # print(command)
         pitch_angle = self.base_euler_xyz[:, 1].unsqueeze(-1)
@@ -405,7 +401,12 @@ class balance_controller:
             self.num_envs, 2, dtype=torch.float, requires_grad=False
         )
         hip_now_pos = self.dof_pos[:, self.hip_indices]
-        hip_target_pos = pitch_angle * torch.ones_like(hip_now_pos)
+        print("=====1=====")
+        print(pitch_angle.size())
+        print(command[:,0].unsqueeze(-1).size())
+        # TODO
+        hip_target_pos = (pitch_angle - command[:,0].unsqueeze(-1)*2) * torch.ones_like(hip_now_pos)
+        
         hip_now_vel = self.dof_vel[:, self.hip_indices]
         hip_target_vel = 0 * torch.ones_like(hip_now_vel)
         hip_out = self.hip_pid.compute(hip_target_pos, hip_now_pos)
@@ -446,7 +447,7 @@ class balance_controller:
         )
         print(wheel_vel_out)
         # print(self.base_lin_vel_world[0, [0, 2]])
-        action[:, self.wheel_indices] = wheel_pitch_out#+wheel_vel_out
+        action[:, self.wheel_indices] = wheel_pitch_out+wheel_vel_out
 
         action_tensor = torch.from_numpy(action)
         # print(action_tensor)
